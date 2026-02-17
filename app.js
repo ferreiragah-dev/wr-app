@@ -376,8 +376,15 @@ function os(c) {
           </div>
           <div class="subcard">
             <h4>Pecas</h4>
-            <div class="check-grid">
-              ${s.products.map((x) => `<label class="flex-row"><input type="checkbox" name="parts" value="${x.id}"><span>${x.desc}</span><input name="qty_${x.id}" type="number" min="1" placeholder="Qtd" style="max-width:80px"></label>`).join("") || "<small>Cadastre pecas.</small>"}
+            <div id="partToggleList" class="service-toggle-list">
+              ${s.products.map((x) => `<button type="button" class="toggle-btn" data-part-id="${x.id}">${x.desc} (${brl(x.sale)} | est. ${x.stock || 0})</button>`).join("") || "<small>Cadastre pecas.</small>"}
+            </div>
+            <div class="selected-list" id="selectedPartsBox">
+              <small>Nenhuma peca selecionada.</small>
+            </div>
+            <div class="metric-line" style="margin-top:8px;">
+              <span>Total de pecas</span>
+              <b id="partsTotalValue">${brl(0)}</b>
             </div>
           </div>
         </div>
@@ -400,22 +407,54 @@ function os(c) {
   const selectedServices = new Set();
   const serviceButtons = Array.from(c.querySelectorAll("[data-service-id]"));
   const selectedBox = document.getElementById("selectedServicesBox");
+  const selectedPartsBox = document.getElementById("selectedPartsBox");
   const serviceTotalEl = document.getElementById("servicesTotalValue");
+  const partsTotalEl = document.getElementById("partsTotalValue");
   const orderPreviewEl = document.getElementById("orderPreviewValue");
   const laborInput = c.querySelector("input[name=labor]");
+  const selectedParts = new Map();
+  const partButtons = Array.from(c.querySelectorAll("[data-part-id]"));
+
+  function partTotalValue() {
+    let totalParts = 0;
+    selectedParts.forEach((qty, partId) => {
+      const p = byId(s.products, partId);
+      totalParts += Number(p?.sale || 0) * Number(qty || 0);
+    });
+    return totalParts;
+  }
 
   function refreshServiceSummary() {
     const ids = Array.from(selectedServices);
     const chosen = ids.map((id) => byId(s.services, id)).filter(Boolean);
     const serviceTotal = chosen.reduce((acc, item) => acc + Number(item.price || 0), 0);
     const labor = Number(laborInput?.value || 0);
-    const preview = labor + serviceTotal;
+    const partsTotal = partTotalValue();
+    const preview = labor + serviceTotal + partsTotal;
 
     selectedBox.innerHTML = chosen.length
       ? chosen.map((item) => `<div>${item.name} - ${brl(item.price)}</div>`).join("")
       : "<small>Nenhum servico selecionado.</small>";
     serviceTotalEl.textContent = brl(serviceTotal);
+    partsTotalEl.textContent = brl(partsTotal);
     orderPreviewEl.textContent = brl(preview);
+  }
+
+  function refreshPartsSummary() {
+    const rows = [];
+    selectedParts.forEach((qty, partId) => {
+      const p = byId(s.products, partId);
+      if (!p) return;
+      rows.push(`
+        <div class="selected-item-row">
+          <span>${p.desc}</span>
+          <input class="qty-input" type="number" min="1" value="${Number(qty || 1)}" data-part-qty="${partId}">
+          <small>${brl(Number(p.sale || 0) * Number(qty || 0))}</small>
+        </div>
+      `);
+    });
+    selectedPartsBox.innerHTML = rows.length ? rows.join("") : "<small>Nenhuma peca selecionada.</small>";
+    refreshServiceSummary();
   }
 
   serviceButtons.forEach((btn) => {
@@ -433,15 +472,40 @@ function os(c) {
     });
   });
 
+  partButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.partId;
+      if (!id) return;
+      if (selectedParts.has(id)) {
+        selectedParts.delete(id);
+        btn.classList.remove("active");
+      } else {
+        selectedParts.set(id, 1);
+        btn.classList.add("active");
+      }
+      refreshPartsSummary();
+    });
+  });
+
+  selectedPartsBox.addEventListener("input", (e) => {
+    const inp = e.target.closest("input[data-part-qty]");
+    if (!inp) return;
+    const partId = inp.dataset.partQty;
+    const qty = Math.max(1, Number(inp.value || 1));
+    selectedParts.set(partId, qty);
+    inp.value = String(qty);
+    refreshPartsSummary();
+  });
+
   laborInput?.addEventListener("input", refreshServiceSummary);
+  refreshPartsSummary();
   refreshServiceSummary();
 
   document.getElementById("fOS").onsubmit = async (e) => {
     e.preventDefault();
     const v = val(e.target);
     const sv = Array.from(selectedServices);
-    const selectedParts = Array.isArray(v.parts) ? v.parts : (v.parts ? [v.parts] : []);
-    const parts = selectedParts.map((id) => ({ productId: id, qty: Number(v[`qty_${id}`] || 1) })).filter((x) => x.qty > 0);
+    const parts = Array.from(selectedParts.entries()).map(([productId, qty]) => ({ productId, qty: Number(qty || 1) })).filter((x) => x.qty > 0);
     s.orders.unshift({
       id: uid(), code: v.code, clientId: v.clientId, vehicleId: v.vehicleId, checkin: v.checkin, labor: Number(v.labor || 0), delivery: v.delivery,
       signature: v.signature, approved: Boolean(v.approved), services: sv, parts, before: [], after: [],

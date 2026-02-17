@@ -343,6 +343,28 @@ textarea,
   min-height: 40px;
 }
 
+.selected-item-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed #2c2c2c;
+}
+
+.selected-item-row:last-child {
+  border-bottom: none;
+}
+
+.qty-input {
+  width: 74px;
+  padding: 6px 8px;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  background: #0f0f0f;
+  color: var(--text);
+}
+
 .table-wrap {
   overflow: auto;
 }
