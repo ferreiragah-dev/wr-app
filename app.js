@@ -110,6 +110,7 @@ function alerts() {
 
 function dashboard(c) {
   const today = new Date().toDateString();
+  const todayIso = new Date().toISOString().slice(0, 10);
   const faturamentoDia = s.orders.filter((o) => o.status === "Finalizado" && new Date(o.closedAt || o.createdAt).toDateString() === today).reduce((a, o) => a + total(o), 0);
   const abertas = s.orders.filter((o) => !["Finalizado", "Cancelado"].includes(o.status)).length;
   const fechadas = s.orders.filter((o) => o.status === "Finalizado").length;
@@ -122,6 +123,31 @@ function dashboard(c) {
     finalizado: s.orders.filter((o) => o.status === "Finalizado").length,
     cancelado: s.orders.filter((o) => o.status === "Cancelado").length,
   };
+  const atrasadasRows = s.orders
+    .filter((o) => o.delivery && !["Finalizado", "Cancelado"].includes(o.status) && new Date(o.delivery) < new Date())
+    .map((o) => [o.code, byId(s.clients, o.clientId)?.name || "-", d(o.delivery), `<span class="tag ${statusTag(o.status)}">${o.status}</span>`]);
+  const agendaHojeRows = s.agenda
+    .filter((a) => a.date === todayIso)
+    .sort((a, b) => String(a.time).localeCompare(String(b.time)))
+    .map((a) => [a.time, a.service, byId(s.employees, a.employeeId)?.name || "-", `${a.duration}h`, a.blocked ? "Bloqueado" : "Ativo"]);
+  const estoqueCriticoRows = s.products
+    .filter((p) => Number(p.stock || 0) <= Number(p.min || 0))
+    .map((p) => [p.code, p.desc, p.stock || 0, p.min || 0]);
+  const receberPendenteRows = s.receivables
+    .filter((r) => r.status !== "Pago")
+    .slice(0, 8)
+    .map((r) => [r.desc, brl(r.amount), d(r.due), r.status]);
+  const pagarPendenteRows = s.payables
+    .filter((p) => p.status !== "Pago")
+    .slice(0, 8)
+    .map((p) => [p.desc, p.supplier || "-", brl(p.amount), d(p.due), p.status]);
+  const topClientesMap = {};
+  s.orders.forEach((o) => {
+    const name = byId(s.clients, o.clientId)?.name || "-";
+    topClientesMap[name] = (topClientesMap[name] || 0) + total(o);
+  });
+  const topClientesRows = Object.entries(topClientesMap).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, value]) => [name, brl(value)]);
+
   const fluxoRows = s.orders.map((o) => [
     o.code,
     byId(s.clients, o.clientId)?.name || "-",
@@ -153,6 +179,32 @@ function dashboard(c) {
       ${table(["OS","Cliente","Veiculo","Status","Total","Acoes"], fluxoRows, true)}
     </div>
   </article>
+  <div class="grid" style="margin-top:12px;">
+    <article class="card">
+      <h3>Agenda de hoje</h3>
+      ${table(["Hora","Servico","Mecanico","Duracao","Status"], agendaHojeRows)}
+    </article>
+    <article class="card">
+      <h3>Estoque critico</h3>
+      ${table(["Codigo","Peca","Qtd","Minimo"], estoqueCriticoRows)}
+    </article>
+    <article class="card">
+      <h3>Contas a receber pendentes</h3>
+      ${table(["Descricao","Valor","Vencimento","Status"], receberPendenteRows)}
+    </article>
+    <article class="card">
+      <h3>Contas a pagar pendentes</h3>
+      ${table(["Descricao","Fornecedor","Valor","Vencimento","Status"], pagarPendenteRows)}
+    </article>
+    <article class="card">
+      <h3>OS com atraso de entrega</h3>
+      ${table(["OS","Cliente","Previsao","Status"], atrasadasRows, true)}
+    </article>
+    <article class="card">
+      <h3>Top clientes (faturamento)</h3>
+      ${table(["Cliente","Total"], topClientesRows)}
+    </article>
+  </div>
   <div class="grid" style="margin-top:12px;">
     <article class="card"><h3>Linha: faturamento mensal</h3><canvas id="cv1" width="620" height="220"></canvas></article>
     <article class="card"><h3>Barras: servicos mais vendidos</h3><canvas id="cv2" width="620" height="220"></canvas></article>
