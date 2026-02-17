@@ -194,14 +194,31 @@ function os(c) {
             <input name="labor" type="number" step="0.01" placeholder="Mao de obra" required>
             <input name="delivery" type="datetime-local" required>
             <input name="signature" placeholder="Assinatura digital (nome)" required>
-            <label class="flex-row"><input name="approved" type="checkbox"> Cliente aprovou o orcamento</label>
+            <div class="toggle-field">
+              <span>Cliente aprovou o orcamento</span>
+              <label class="switch">
+                <input id="approvedToggle" name="approved" type="checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
         </div>
         <div class="split-2">
           <div class="subcard">
             <h4>Servicos</h4>
-            <div class="check-grid">
-              ${s.services.map((x) => `<label class="flex-row"><input type="checkbox" name="services" value="${x.id}"><span>${x.name} (${brl(x.price)})</span></label>`).join("") || "<small>Cadastre servicos.</small>"}
+            <div id="serviceToggleList" class="service-toggle-list">
+              ${s.services.map((x) => `<button type="button" class="toggle-btn" data-service-id="${x.id}" data-service-price="${Number(x.price || 0)}">${x.name} (${brl(x.price)})</button>`).join("") || "<small>Cadastre servicos.</small>"}
+            </div>
+            <div class="selected-list" id="selectedServicesBox">
+              <small>Nenhum servico selecionado.</small>
+            </div>
+            <div class="metric-line" style="margin-top:8px;">
+              <span>Total de servicos</span>
+              <b id="servicesTotalValue">${brl(0)}</b>
+            </div>
+            <div class="metric-line">
+              <span>Previsao total OS (mao de obra + servicos)</span>
+              <b id="orderPreviewValue">${brl(0)}</b>
             </div>
           </div>
           <div class="subcard">
@@ -237,10 +254,49 @@ function os(c) {
     </article>
   </div>`;
 
+  const selectedServices = new Set();
+  const serviceButtons = Array.from(c.querySelectorAll("[data-service-id]"));
+  const selectedBox = document.getElementById("selectedServicesBox");
+  const serviceTotalEl = document.getElementById("servicesTotalValue");
+  const orderPreviewEl = document.getElementById("orderPreviewValue");
+  const laborInput = c.querySelector("input[name=labor]");
+
+  function refreshServiceSummary() {
+    const ids = Array.from(selectedServices);
+    const chosen = ids.map((id) => byId(s.services, id)).filter(Boolean);
+    const serviceTotal = chosen.reduce((acc, item) => acc + Number(item.price || 0), 0);
+    const labor = Number(laborInput?.value || 0);
+    const preview = labor + serviceTotal;
+
+    selectedBox.innerHTML = chosen.length
+      ? chosen.map((item) => `<div>${item.name} - ${brl(item.price)}</div>`).join("")
+      : "<small>Nenhum servico selecionado.</small>";
+    serviceTotalEl.textContent = brl(serviceTotal);
+    orderPreviewEl.textContent = brl(preview);
+  }
+
+  serviceButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.serviceId;
+      if (!id) return;
+      if (selectedServices.has(id)) {
+        selectedServices.delete(id);
+        btn.classList.remove("active");
+      } else {
+        selectedServices.add(id);
+        btn.classList.add("active");
+      }
+      refreshServiceSummary();
+    });
+  });
+
+  laborInput?.addEventListener("input", refreshServiceSummary);
+  refreshServiceSummary();
+
   document.getElementById("fOS").onsubmit = async (e) => {
     e.preventDefault();
     const v = val(e.target);
-    const sv = Array.isArray(v.services) ? v.services : (v.services ? [v.services] : []);
+    const sv = Array.from(selectedServices);
     const selectedParts = Array.isArray(v.parts) ? v.parts : (v.parts ? [v.parts] : []);
     const parts = selectedParts.map((id) => ({ productId: id, qty: Number(v[`qty_${id}`] || 1) })).filter((x) => x.qty > 0);
     const before = await files(e.target.querySelector("input[name=before]").files);
