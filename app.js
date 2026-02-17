@@ -282,10 +282,9 @@ function cadastro(c) {
       <input name="vin" placeholder="VIN opcional"><select name="clientId" required>${options(s.clients, (x) => x.name)}</select><button>Cadastrar</button>
     </form></article>
   </div>
-  <div class="grid" style="margin-top:12px;">
+  <div class="split-2" style="margin-top:12px;">
     <article class="card"><h3>Clientes</h3>${table(["Nome","CPF/CNPJ","Telefone","WhatsApp","Historico"], s.clients.map((x) => [x.name,x.doc,x.phone,x.whats||"-", s.orders.filter((o) => o.clientId===x.id).length]))}</article>
     <article class="card"><h3>Veiculos</h3>${table(["Placa","Modelo","Marca","Ano","Cliente"], s.vehicles.map((x) => [x.plate,x.model,x.brand,x.year,byId(s.clients,x.clientId)?.name||"-"]))}</article>
-    <article class="card"><h3>Cadastros administrativos</h3><p>Funcionarios, servicos e pecas/produtos foram movidos para <b>/admin</b> para manter esta tela mais limpa.</p></article>
   </div>`;
   on("#fClient", (v) => { s.clients.push({ id: uid(), ...v, createdAt: now() }); log(`Cliente cadastrado: ${v.name}`); render(); });
   on("#fVeh", (v) => { s.vehicles.push({ id: uid(), ...v, createdAt: now() }); log(`Veiculo cadastrado: ${v.plate}`); render(); });
