@@ -6,6 +6,7 @@ COPY index.html ./
 COPY style.css ./
 COPY app.js ./
 COPY admin ./admin
+COPY financeiro ./financeiro
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

@@ -12,7 +12,6 @@ const BASE_MENU = [
   ["dashboard", "Dashboard"],
   ["cadastro", "Cadastro Base"],
   ["os", "Ordem de Servico"],
-  ["financeiro", "Financeiro"],
   ["agenda", "Agenda"],
   ["crm", "CRM"],
   ["usuarios", "Usuarios"],
@@ -21,9 +20,11 @@ const BASE_MENU = [
 
 const s = load();
 const isAdminRoute = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
-let tab = isAdminRoute ? "admin" : "dashboard";
+const isFinanceRoute = window.location.pathname === "/financeiro" || window.location.pathname.startsWith("/financeiro/");
+let tab = isAdminRoute ? "admin" : (isFinanceRoute ? "financeiro" : "dashboard");
 
 function getMenu() {
+  if (isFinanceRoute) return [["financeiro", "Financeiro"], ["relatorios", "Relatorios"]];
   if (!isAdminRoute) return BASE_MENU;
   return [["admin", "Admin Cadastros"], ["estoque", "Estoque"], ["usuarios", "Usuarios"], ["relatorios", "Relatorios"]];
 }

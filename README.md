@@ -7,7 +7,8 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 1. Abra o arquivo `index.html` no navegador.
 2. Clique em `Popular dados de exemplo` para testar rapidamente o fluxo completo.
 3. Para acessar os cadastros administrativos, abra `.../admin` no navegador.
-4. Em deploy, sempre faca rebuild/redeploy apos alterar arquivos.
+4. Para acessar o painel financeiro isolado, abra `.../financeiro`.
+5. Em deploy, sempre faca rebuild/redeploy apos alterar arquivos.
 
 ## Modulos implementados
 
@@ -23,8 +24,9 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 
 ## Separacao de interface
 
-- Tela padrao: foco operacional (clientes, veiculos, OS, agenda, financeiro etc).
+- Tela padrao: foco operacional (clientes, veiculos, OS, agenda, CRM e acompanhamento).
 - Tela administrativa (`/admin`): cadastro de funcionarios, servicos, pecas/produtos e estoque.
+- Tela financeira (`/financeiro`): contas a receber/pagar, fluxo de caixa e metricas financeiras.
 
 ## Persistencia
 
