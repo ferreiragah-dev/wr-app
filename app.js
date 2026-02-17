@@ -1,7 +1,15 @@
 ﻿const KEY = "wrmec_v1";
+const SESSION_KEY = "wrmec_session_v1";
+const AUTH_USERS_KEY = "wrmec_auth_users_v1";
 const OS_STATUS = ["Orcamento", "Aguardando aprovacao", "Em execucao", "Finalizado", "Cancelado"];
 const PAY_STATUS = ["Pendente", "Pago", "Atrasado"];
 const ROLES = ["Administrador", "Atendente", "Mecanico", "Financeiro"];
+const DEFAULT_AUTH_USERS = [
+  { username: "admin", password: "admin123", role: "Administrador", name: "Admin" },
+  { username: "financeiro", password: "finance123", role: "Financeiro", name: "Financeiro" },
+  { username: "atendente", password: "atendente123", role: "Atendente", name: "Atendente" },
+  { username: "mecanico", password: "mecanico123", role: "Mecanico", name: "Mecanico" },
+];
 const ROLE = {
   Administrador: { finance: true, users: true, cancel: true, price: true },
   Atendente: { finance: false, users: false, cancel: false, price: false },
@@ -18,10 +26,13 @@ const BASE_MENU = [
   ["relatorios", "Relatorios"],
 ];
 
+initAuthUsers();
+const session = requireSession();
 const s = load();
 const isAdminRoute = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const isFinanceRoute = window.location.pathname === "/financeiro" || window.location.pathname.startsWith("/financeiro/");
 let tab = isAdminRoute ? "admin" : (isFinanceRoute ? "financeiro" : "dashboard");
+syncSessionUser();
 
 function getMenu() {
   if (isFinanceRoute) return [["financeiro", "Financeiro"], ["relatorios", "Relatorios"]];
@@ -29,6 +40,32 @@ function getMenu() {
   return [["admin", "Admin Cadastros"], ["estoque", "Estoque"], ["usuarios", "Usuarios"], ["relatorios", "Relatorios"]];
 }
 
+function initAuthUsers() {
+  const raw = localStorage.getItem(AUTH_USERS_KEY);
+  if (!raw) localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(DEFAULT_AUTH_USERS));
+}
+
+function requireSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed?.username && parsed?.role) return parsed;
+  } catch {}
+  window.location.replace("/login/");
+  throw new Error("Sessao obrigatoria");
+}
+
+function syncSessionUser() {
+  const found = s.users.find((u) => u.name === (session.name || session.username) && u.role === session.role);
+  if (found) {
+    s.settings.currentUserId = found.id;
+    return;
+  }
+  const created = { id: uid(), name: session.name || session.username, role: session.role };
+  s.users.push(created);
+  s.settings.currentUserId = created.id;
+  save();
+}
 function load() {
   const id = uid();
   const base = {
@@ -82,6 +119,13 @@ function render() {
   document.getElementById("menu").onclick = (e) => { const b = e.target.closest("button[data-tab]"); if (!b) return; tab = b.dataset.tab; render(); };
   document.getElementById("currentUser").innerHTML = s.users.map((u) => `<option value="${u.id}" ${u.id === s.settings.currentUserId ? "selected" : ""}>${u.name} (${u.role})</option>`).join("");
   document.getElementById("currentUser").onchange = (e) => { s.settings.currentUserId = e.target.value; save(); render(); };
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.replace("/login/");
+    };
+  }
   alerts();
   const c = document.getElementById("sectionContent");
   if (tab === "admin") admin(c);
@@ -738,3 +782,5 @@ function seed() {
 
 document.getElementById("seedBtn").addEventListener("click", seed);
 render();
+
+

@@ -4,11 +4,18 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 
 ## Como executar
 
-1. Abra o arquivo `index.html` no navegador.
+1. Abra `.../login` no navegador.
 2. Clique em `Popular dados de exemplo` para testar rapidamente o fluxo completo.
 3. Para acessar os cadastros administrativos, abra `.../admin` no navegador.
 4. Para acessar o painel financeiro isolado, abra `.../financeiro`.
 5. Em deploy, sempre faca rebuild/redeploy apos alterar arquivos.
+
+## Login
+
+- Usuario padrao: `admin`
+- Senha padrao: `admin123`
+- O login cria sessao no navegador (`localStorage`) e libera acesso as demais rotas.
+- Para trocar a foto/logo da tela de login, adicione o arquivo em `assets/wr-logo.jpg`.
 
 ## Modulos implementados
 

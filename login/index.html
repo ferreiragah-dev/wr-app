@@ -1,0 +1,32 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WR Mecanica - Login</title>
+  <link rel="stylesheet" href="/login/login.css" />
+</head>
+<body>
+  <main class="login-wrap">
+    <section class="login-card">
+      <div class="logo-box">
+        <img src="/assets/wr-logo.jpg" alt="WR Mecanica" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='grid';" />
+        <div id="logoFallback" class="logo-fallback">WR Mecanica</div>
+      </div>
+      <h1>Acesso ao Sistema</h1>
+      <p>Entre com seu usuario para acessar a oficina.</p>
+
+      <form id="loginForm" class="login-form">
+        <input name="username" placeholder="Usuario" required />
+        <input name="password" type="password" placeholder="Senha" required />
+        <button type="submit">Entrar</button>
+      </form>
+
+      <small id="loginMsg"></small>
+      <small>Padrao inicial: admin / admin123</small>
+    </section>
+  </main>
+
+  <script src="/login/login.js"></script>
+</body>
+</html>
