@@ -644,7 +644,7 @@ function usuarios(c) {
       <select name="role">${ROLES.map((x) => `<option>${x}</option>`).join("")}</select>
       <button ${can("users") ? "" : "disabled"}>Criar</button>
     </form><small id="userMsg">Perfis: Administrador, Escritorio, Mecanico, Financeiro.</small></article>
-    <article class="card"><h3>Usuarios</h3>${table(["Nome","Usuario","Perfil"], loginUsers.map((u) => [u.name || "-", u.username, u.role]))}</article>
+    <article class="card"><h3>Usuarios</h3>${table(["Nome","Usuario","Perfil","Acao"], loginUsers.map((u) => [u.name || "-", u.username, u.role, `<button class="danger" data-del-user="${esc(u.username)}" ${can("users") ? "" : "disabled"}>Apagar</button>`]), true)}</article>
   </div>
   <article class="card" style="margin-top:12px;"><h3>Log de auditoria</h3>${table(["Quando","Quem","O que"], s.audit.slice(0, 60).map((x) => [d(x.when), x.who, x.action]))}</article>`;
 
@@ -673,10 +673,39 @@ function usuarios(c) {
     logins.push({ username, password, role, name });
     saveAuthUsers(logins);
 
-    s.users.push({ id: uid(), name, role, createdAt: now() });
+    s.users.push({ id: uid(), name, username, role, createdAt: now() });
     log(`Usuario criado: ${name} (${username})`);
     render();
   };
+
+  c.querySelector("table")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-del-user]");
+    if (!btn || !can("users")) return;
+    const username = String(btn.dataset.delUser || "").toLowerCase();
+    const msg = document.getElementById("userMsg");
+
+    if (!username) return;
+    if (username === String(session.username || "").toLowerCase()) {
+      msg.textContent = "Nao e permitido apagar o usuario logado na sessao atual.";
+      return;
+    }
+
+    const logins = authUsers();
+    const target = logins.find((u) => String(u.username || "").toLowerCase() === username);
+    if (!target) return;
+
+    saveAuthUsers(logins.filter((u) => String(u.username || "").toLowerCase() !== username));
+    s.users = s.users.filter((u) => {
+      const uName = String(u.username || "").toLowerCase();
+      if (uName && uName === username) return false;
+      return !(String(u.name || "").toLowerCase() === String(target.name || "").toLowerCase() && String(u.role || "") === String(target.role || ""));
+    });
+    if (!byId(s.users, s.settings.currentUserId) && s.users.length) {
+      s.settings.currentUserId = s.users[0].id;
+    }
+    log(`Usuario removido: ${target.name || target.username} (${target.username})`);
+    render();
+  });
 }
 
 function relatorios(c) {
