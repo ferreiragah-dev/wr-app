@@ -7,6 +7,7 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 1. Abra o arquivo `index.html` no navegador.
 2. Clique em `Popular dados de exemplo` para testar rapidamente o fluxo completo.
 3. Para acessar os cadastros administrativos, abra `.../admin` no navegador.
+4. Em deploy, sempre faca rebuild/redeploy apos alterar arquivos.
 
 ## Modulos implementados
 
