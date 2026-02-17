@@ -343,10 +343,7 @@ function os(c) {
             <input name="code" value="OS-${String(s.orders.length + 1).padStart(4, "0")}" required>
             <select name="clientId" required>${options(s.clients, (x) => x.name)}</select>
             <select name="vehicleId" required>${options(s.vehicles, (x) => `${x.plate} - ${x.model}`)}</select>
-            <input name="checkin" placeholder="Check-in e avarias" required>
-            <input name="labor" type="number" step="0.01" placeholder="Mao de obra" required>
             <input name="delivery" type="datetime-local" required>
-            <input name="signature" placeholder="Assinatura digital (nome)" required>
             <div class="toggle-field">
               <span>Cliente aprovou o orcamento</span>
               <label class="switch">
@@ -370,7 +367,7 @@ function os(c) {
               <b id="servicesTotalValue">${brl(0)}</b>
             </div>
             <div class="metric-line">
-              <span>Previsao total OS (mao de obra + servicos)</span>
+              <span>Previsao total OS (servicos + pecas)</span>
               <b id="orderPreviewValue">${brl(0)}</b>
             </div>
           </div>
@@ -411,7 +408,6 @@ function os(c) {
   const serviceTotalEl = document.getElementById("servicesTotalValue");
   const partsTotalEl = document.getElementById("partsTotalValue");
   const orderPreviewEl = document.getElementById("orderPreviewValue");
-  const laborInput = c.querySelector("input[name=labor]");
   const selectedParts = new Map();
   const partButtons = Array.from(c.querySelectorAll("[data-part-id]"));
 
@@ -428,9 +424,8 @@ function os(c) {
     const ids = Array.from(selectedServices);
     const chosen = ids.map((id) => byId(s.services, id)).filter(Boolean);
     const serviceTotal = chosen.reduce((acc, item) => acc + Number(item.price || 0), 0);
-    const labor = Number(laborInput?.value || 0);
     const partsTotal = partTotalValue();
-    const preview = labor + serviceTotal + partsTotal;
+    const preview = serviceTotal + partsTotal;
 
     selectedBox.innerHTML = chosen.length
       ? chosen.map((item) => `<div>${item.name} - ${brl(item.price)}</div>`).join("")
@@ -497,7 +492,6 @@ function os(c) {
     refreshPartsSummary();
   });
 
-  laborInput?.addEventListener("input", refreshServiceSummary);
   refreshPartsSummary();
   refreshServiceSummary();
 
@@ -507,8 +501,8 @@ function os(c) {
     const sv = Array.from(selectedServices);
     const parts = Array.from(selectedParts.entries()).map(([productId, qty]) => ({ productId, qty: Number(qty || 1) })).filter((x) => x.qty > 0);
     s.orders.unshift({
-      id: uid(), code: v.code, clientId: v.clientId, vehicleId: v.vehicleId, checkin: v.checkin, labor: Number(v.labor || 0), delivery: v.delivery,
-      signature: v.signature, approved: Boolean(v.approved), services: sv, parts, before: [], after: [],
+      id: uid(), code: v.code, clientId: v.clientId, vehicleId: v.vehicleId, checkin: "", labor: 0, delivery: v.delivery,
+      signature: "", approved: Boolean(v.approved), services: sv, parts, before: [], after: [],
       status: v.approved ? "Aguardando aprovacao" : "Orcamento", createdAt: now(), updatedAt: now(), techHours: []
     });
     log(`OS criada: ${v.code}`); render();
