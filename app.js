@@ -658,7 +658,9 @@ function relatorios(c) {
 }
 
 function table(head, rows, raw = false) {
-  const r = rows.length ? rows.map((x) => `<tr>${x.map((v) => `<td>${raw ? v : esc(v)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${head.length}">Sem dados.</td></tr>`;
+  const r = rows.length
+    ? rows.map((x) => `<tr>${x.map((v, i) => `<td data-label="${esc(head[i] || "")}">${raw ? v : esc(v)}</td>`).join("")}</tr>`).join("")
+    : `<tr><td colspan="${head.length}">Sem dados.</td></tr>`;
   return `<div class="table-wrap"><table><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${r}</tbody></table></div>`;
 }
 
