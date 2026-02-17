@@ -365,6 +365,17 @@ textarea,
   color: var(--text);
 }
 
+.field-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.82rem;
+  color: var(--yellow-soft);
+  font-weight: 600;
+}
+
 .table-wrap {
   overflow: auto;
 }

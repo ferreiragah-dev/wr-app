@@ -340,16 +340,31 @@ function os(c) {
         <div class="subcard">
           <h4>Dados principais</h4>
           <div class="form-grid">
-            <input name="code" value="OS-${String(s.orders.length + 1).padStart(4, "0")}" required>
-            <select name="clientId" required>${options(s.clients, (x) => x.name)}</select>
-            <select name="vehicleId" required>${options(s.vehicles, (x) => `${x.plate} - ${x.model}`)}</select>
-            <input name="delivery" type="datetime-local" required>
-            <div class="toggle-field">
-              <span>Cliente aprovou o orcamento</span>
-              <label class="switch">
-                <input id="approvedToggle" name="approved" type="checkbox">
-                <span class="slider"></span>
-              </label>
+            <div class="field-stack">
+              <label class="field-label" for="osCode">Codigo da OS</label>
+              <input id="osCode" name="code" value="OS-${String(s.orders.length + 1).padStart(4, "0")}" required>
+            </div>
+            <div class="field-stack">
+              <label class="field-label" for="osClient">Cliente</label>
+              <select id="osClient" name="clientId" required>${options(s.clients, (x) => x.name)}</select>
+            </div>
+            <div class="field-stack">
+              <label class="field-label" for="osVehicle">Veiculo</label>
+              <select id="osVehicle" name="vehicleId" required>${options(s.vehicles, (x) => `${x.plate} - ${x.model}`)}</select>
+            </div>
+            <div class="field-stack">
+              <label class="field-label" for="osDelivery">Previsao de entrega</label>
+              <input id="osDelivery" name="delivery" type="datetime-local" required>
+            </div>
+            <div class="field-stack">
+              <label class="field-label" for="approvedToggle">Aprovacao do cliente</label>
+              <div class="toggle-field">
+                <span>Cliente aprovou o orcamento</span>
+                <label class="switch">
+                  <input id="approvedToggle" name="approved" type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
