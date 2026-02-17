@@ -109,9 +109,7 @@ function alerts() {
 }
 
 function dashboard(c) {
-  const today = new Date().toDateString();
   const todayIso = new Date().toISOString().slice(0, 10);
-  const faturamentoDia = s.orders.filter((o) => o.status === "Finalizado" && new Date(o.closedAt || o.createdAt).toDateString() === today).reduce((a, o) => a + total(o), 0);
   const abertas = s.orders.filter((o) => !["Finalizado", "Cancelado"].includes(o.status)).length;
   const fechadas = s.orders.filter((o) => o.status === "Finalizado").length;
   const tempo = avg(s.orders.filter((o) => o.closedAt).map((o) => (new Date(o.closedAt) - new Date(o.createdAt)) / 3600000));
@@ -158,7 +156,6 @@ function dashboard(c) {
   ]);
   c.innerHTML = `
   <div class="grid">
-    <article class="card"><h3>Faturamento do dia</h3><div class="kpi">${brl(faturamentoDia)}</div></article>
     <article class="card"><h3>OS abertas vs fechadas</h3><div class="kpi">${abertas} / ${fechadas}</div></article>
     <article class="card"><h3>Tempo medio de servico</h3><div class="kpi">${tempo.toFixed(1)}h</div></article>
     <article class="card"><h3>Estoque critico</h3><div class="kpi">${critico}</div></article>
@@ -204,17 +201,7 @@ function dashboard(c) {
       <h3>Top clientes (faturamento)</h3>
       ${table(["Cliente","Total"], topClientesRows)}
     </article>
-  </div>
-  <div class="grid" style="margin-top:12px;">
-    <article class="card"><h3>Linha: faturamento mensal</h3><canvas id="cv1" width="620" height="220"></canvas></article>
-    <article class="card"><h3>Barras: servicos mais vendidos</h3><canvas id="cv2" width="620" height="220"></canvas></article>
-    <article class="card"><h3>Pizza: formas de pagamento</h3><canvas id="cv3" width="620" height="220"></canvas></article>
-    <article class="card"><h3>Heatmap: horarios</h3><canvas id="cv4" width="620" height="220"></canvas></article>
   </div>`;
-  drawLine("cv1");
-  drawBars("cv2");
-  drawPie("cv3");
-  drawHeat("cv4");
 
   c.querySelector("#dashboardOsTable table")?.addEventListener("click", (e) => {
     const b = e.target.closest("button[data-a]"); if (!b) return;
@@ -465,6 +452,10 @@ function estoque(c) {
 
 function financeiro(c) {
   if (!can("finance")) { c.innerHTML = `<article class="card"><h3>Acesso restrito</h3><p>Seu perfil nao pode ver financeiro.</p></article>`; return; }
+  const today = new Date().toDateString();
+  const faturamentoDia = s.orders
+    .filter((o) => o.status === "Finalizado" && new Date(o.closedAt || o.createdAt).toDateString() === today)
+    .reduce((a, o) => a + total(o), 0);
   const entradas = s.receivables.filter((x) => x.status === "Pago").reduce((a, x) => a + Number(x.amount || 0), 0);
   const saidas = s.payables.filter((x) => x.status === "Pago").reduce((a, x) => a + Number(x.amount || 0), 0);
   const ticket = avg(s.orders.filter((o) => o.status === "Finalizado").map((o) => total(o)));
@@ -475,6 +466,15 @@ function financeiro(c) {
   const margem = faturamentoMes ? ((faturamentoMes - saidas) / faturamentoMes) * 100 : 0;
   const lucrativos = serviceProfit().slice(0, 5).map((x) => `${x.name}: ${brl(x.value)}`).join("<br>");
   c.innerHTML = `
+  <div class="grid">
+    <article class="card"><h3>Faturamento do dia</h3><div class="kpi">${brl(faturamentoDia)}</div></article>
+  </div>
+  <div class="grid" style="margin-top:12px;">
+    <article class="card"><h3>Linha: faturamento mensal</h3><canvas id="cv1" width="620" height="220"></canvas></article>
+    <article class="card"><h3>Barras: servicos mais vendidos</h3><canvas id="cv2" width="620" height="220"></canvas></article>
+    <article class="card"><h3>Pizza: formas de pagamento</h3><canvas id="cv3" width="620" height="220"></canvas></article>
+    <article class="card"><h3>Heatmap: horarios</h3><canvas id="cv4" width="620" height="220"></canvas></article>
+  </div>
   <div class="grid">
     <article class="card"><h3>Entradas</h3><div class="kpi">${brl(entradas)}</div></article>
     <article class="card"><h3>Saidas</h3><div class="kpi">${brl(saidas)}</div></article>
@@ -491,6 +491,10 @@ function financeiro(c) {
     <article class="card"><h3>Receber</h3>${table(["Descricao","Valor","Forma","Parcelas","Venc","Status","Acao"], s.receivables.map((r) => [r.desc,brl(r.amount),r.method,r.installments||1,d(r.due),r.status,`<button class="secondary" data-r="${r.id}">Marcar pago</button>`]), true)}</article>
     <article class="card"><h3>Pagar</h3>${table(["Descricao","Fornecedor","Valor","Venc","Status"], s.payables.map((p) => [p.desc,p.supplier||"-",brl(p.amount),d(p.due),p.status]))}</article>
   </div>`;
+  drawLine("cv1");
+  drawBars("cv2");
+  drawPie("cv3");
+  drawHeat("cv4");
   on("#fPay", (v) => { s.payables.push({ id: uid(), ...v, status: "Pendente", createdAt: now() }); log(`Conta a pagar criada: ${v.desc}`); render(); });
   c.querySelector("table").onclick = (e) => {
     const b = e.target.closest("button[data-r]"); if (!b) return;
