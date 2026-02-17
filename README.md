@@ -6,10 +6,11 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 
 1. Abra o arquivo `index.html` no navegador.
 2. Clique em `Popular dados de exemplo` para testar rapidamente o fluxo completo.
+3. Para acessar os cadastros administrativos, abra `.../admin` no navegador.
 
 ## Modulos implementados
 
-- Cadastro base: clientes, veiculos, funcionarios, servicos e pecas/produtos.
+- Cadastro base: clientes e veiculos.
 - Ordem de servico: abertura, fluxo de status, assinatura digital (nome), fotos antes/depois, PDF e WhatsApp.
 - Estoque: entrada, saida automatica no fechamento da OS, estoque minimo, lote/validade e indicadores.
 - Financeiro: contas a receber/pagar, fluxo basico de caixa e metricas.
@@ -18,6 +19,11 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 - CRM: historico do cliente, lembretes automaticos, fidelidade e envio de status.
 - Usuarios/seguranca: perfis, permissoes por papel e log de auditoria.
 - Relatorios: OS por periodo, faturamento por servico, ranking de clientes, lucro por mecanico e margem por servico.
+
+## Separacao de interface
+
+- Tela padrao: foco operacional (clientes, veiculos, OS, agenda, financeiro etc).
+- Tela administrativa (`/admin`): cadastro de funcionarios, servicos e pecas/produtos.
 
 ## Persistencia
 

@@ -8,7 +8,7 @@ const ROLE = {
   Mecanico: { finance: false, users: false, cancel: false, price: false },
   Financeiro: { finance: true, users: false, cancel: false, price: false },
 };
-const MENU = [
+const BASE_MENU = [
   ["dashboard", "Dashboard"],
   ["cadastro", "Cadastro Base"],
   ["os", "Ordem de Servico"],
@@ -21,7 +21,13 @@ const MENU = [
 ];
 
 const s = load();
-let tab = "dashboard";
+const isAdminRoute = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
+let tab = isAdminRoute ? "admin" : "dashboard";
+
+function getMenu() {
+  if (!isAdminRoute) return BASE_MENU;
+  return [["admin", "Admin Cadastros"], ["usuarios", "Usuarios"], ["relatorios", "Relatorios"]];
+}
 
 function load() {
   const id = uid();
@@ -69,13 +75,16 @@ function options(arr, label, selected = "") {
 }
 
 function render() {
-  document.getElementById("menu").innerHTML = MENU.map(([id, label]) => `<button data-tab="${id}" class="${id === tab ? "active" : ""}">${label}</button>`).join("");
-  document.getElementById("sectionTitle").textContent = MENU.find(([id]) => id === tab)?.[1] || "WR Mecanica";
+  const menu = getMenu();
+  if (!menu.find(([id]) => id === tab)) tab = menu[0][0];
+  document.getElementById("menu").innerHTML = menu.map(([id, label]) => `<button data-tab="${id}" class="${id === tab ? "active" : ""}">${label}</button>`).join("");
+  document.getElementById("sectionTitle").textContent = menu.find(([id]) => id === tab)?.[1] || "WR Mecanica";
   document.getElementById("menu").onclick = (e) => { const b = e.target.closest("button[data-tab]"); if (!b) return; tab = b.dataset.tab; render(); };
   document.getElementById("currentUser").innerHTML = s.users.map((u) => `<option value="${u.id}" ${u.id === s.settings.currentUserId ? "selected" : ""}>${u.name} (${u.role})</option>`).join("");
   document.getElementById("currentUser").onchange = (e) => { s.settings.currentUserId = e.target.value; save(); render(); };
   alerts();
   const c = document.getElementById("sectionContent");
+  if (tab === "admin") admin(c);
   if (tab === "dashboard") dashboard(c);
   if (tab === "cadastro") cadastro(c);
   if (tab === "os") os(c);
@@ -136,6 +145,19 @@ function cadastro(c) {
       <input name="year" type="number" placeholder="Ano" required><input name="color" placeholder="Cor" required><input name="km" type="number" placeholder="KM atual" required>
       <input name="vin" placeholder="VIN opcional"><select name="clientId" required>${options(s.clients, (x) => x.name)}</select><button>Cadastrar</button>
     </form></article>
+  </div>
+  <div class="grid" style="margin-top:12px;">
+    <article class="card"><h3>Clientes</h3>${table(["Nome","CPF/CNPJ","Telefone","WhatsApp","Historico"], s.clients.map((x) => [x.name,x.doc,x.phone,x.whats||"-", s.orders.filter((o) => o.clientId===x.id).length]))}</article>
+    <article class="card"><h3>Veiculos</h3>${table(["Placa","Modelo","Marca","Ano","Cliente"], s.vehicles.map((x) => [x.plate,x.model,x.brand,x.year,byId(s.clients,x.clientId)?.name||"-"]))}</article>
+    <article class="card"><h3>Cadastros administrativos</h3><p>Funcionarios, servicos e pecas/produtos foram movidos para <b>/admin</b> para manter esta tela mais limpa.</p></article>
+  </div>`;
+  on("#fClient", (v) => { s.clients.push({ id: uid(), ...v, createdAt: now() }); log(`Cliente cadastrado: ${v.name}`); render(); });
+  on("#fVeh", (v) => { s.vehicles.push({ id: uid(), ...v, createdAt: now() }); log(`Veiculo cadastrado: ${v.plate}`); render(); });
+}
+
+function admin(c) {
+  c.innerHTML = `
+  <div class="grid">
     <article class="card"><h3>Funcionarios</h3><form id="fEmp" class="form-grid">
       <input name="name" placeholder="Nome" required><select name="role"><option>Mecanico</option><option>Atendente</option><option>Gerente</option></select>
       <input name="commission" type="number" step="0.1" placeholder="Comissao %" required><input name="worked" type="number" step="0.1" placeholder="Horas trabalhadas">
@@ -150,14 +172,10 @@ function cadastro(c) {
     </form></article>
   </div>
   <div class="grid" style="margin-top:12px;">
-    <article class="card"><h3>Clientes</h3>${table(["Nome","CPF/CNPJ","Telefone","WhatsApp","Historico"], s.clients.map((x) => [x.name,x.doc,x.phone,x.whats||"-", s.orders.filter((o) => o.clientId===x.id).length]))}</article>
-    <article class="card"><h3>Veiculos</h3>${table(["Placa","Modelo","Marca","Ano","Cliente"], s.vehicles.map((x) => [x.plate,x.model,x.brand,x.year,byId(s.clients,x.clientId)?.name||"-"]))}</article>
     <article class="card"><h3>Funcionarios</h3>${table(["Nome","Funcao","Comissao","H. Faturadas","H. Trabalhadas"], s.employees.map((x) => [x.name,x.role,`${x.commission}%`,x.billed||0,x.worked||0]))}</article>
     <article class="card"><h3>Servicos</h3>${table(["Servico","Preco","Tempo"], s.services.map((x) => [x.name,brl(x.price),`${x.hours}h`]))}</article>
     <article class="card"><h3>Pecas</h3>${table(["Codigo","Descricao","Custo","Venda","Estoque","Minimo"], s.products.map((x) => [x.code,x.desc,brl(x.cost),brl(x.sale),x.stock||0,x.min||0]))}</article>
   </div>`;
-  on("#fClient", (v) => { s.clients.push({ id: uid(), ...v, createdAt: now() }); log(`Cliente cadastrado: ${v.name}`); render(); });
-  on("#fVeh", (v) => { s.vehicles.push({ id: uid(), ...v, createdAt: now() }); log(`Veiculo cadastrado: ${v.plate}`); render(); });
   on("#fEmp", (v) => { s.employees.push({ id: uid(), ...v, createdAt: now() }); log(`Funcionario cadastrado: ${v.name}`); render(); });
   on("#fSvc", (v) => { s.services.push({ id: uid(), ...v, createdAt: now() }); log(`Servico cadastrado: ${v.name}`); render(); });
   on("#fPrd", (v) => { s.products.push({ id: uid(), ...v, batches: [], createdAt: now() }); log(`Produto cadastrado: ${v.desc}`); render(); });
