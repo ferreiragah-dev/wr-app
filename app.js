@@ -176,7 +176,7 @@ function dashboard(c) {
       ${table(["OS","Cliente","Veiculo","Status","Total","Acoes"], fluxoRows, true)}
     </div>
   </article>
-  <div class="grid" style="margin-top:12px;">
+  <div class="dashboard-panels" style="margin-top:12px;">
     <article class="card">
       <h3>Agenda de hoje</h3>
       ${table(["Hora","Servico","Mecanico","Duracao","Status"], agendaHojeRows)}
