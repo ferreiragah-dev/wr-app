@@ -3,15 +3,16 @@ const SESSION_KEY = "wrmec_session_v1";
 const AUTH_USERS_KEY = "wrmec_auth_users_v1";
 const OS_STATUS = ["Orcamento", "Aguardando aprovacao", "Em execucao", "Finalizado", "Cancelado"];
 const PAY_STATUS = ["Pendente", "Pago", "Atrasado"];
-const ROLES = ["Administrador", "Atendente", "Mecanico", "Financeiro"];
+const ROLES = ["Administrador", "Escritorio", "Mecanico", "Financeiro"];
 const DEFAULT_AUTH_USERS = [
   { username: "admin", password: "admin123", role: "Administrador", name: "Admin" },
   { username: "financeiro", password: "finance123", role: "Financeiro", name: "Financeiro" },
-  { username: "atendente", password: "atendente123", role: "Atendente", name: "Atendente" },
+  { username: "escritorio", password: "escritorio123", role: "Escritorio", name: "Escritorio" },
   { username: "mecanico", password: "mecanico123", role: "Mecanico", name: "Mecanico" },
 ];
 const ROLE = {
   Administrador: { finance: true, users: true, cancel: true, price: true },
+  Escritorio: { finance: false, users: false, cancel: false, price: false },
   Atendente: { finance: false, users: false, cancel: false, price: false },
   Mecanico: { finance: false, users: false, cancel: false, price: false },
   Financeiro: { finance: true, users: false, cancel: false, price: false },
@@ -294,7 +295,7 @@ function admin(c) {
   c.innerHTML = `
   <div class="grid">
     <article class="card"><h3>Funcionarios</h3><form id="fEmp" class="form-grid">
-      <input name="name" placeholder="Nome" required><select name="role"><option>Mecanico</option><option>Atendente</option><option>Gerente</option></select>
+      <input name="name" placeholder="Nome" required><select name="role"><option>Mecanico</option><option>Escritorio</option><option>Gerente</option></select>
       <input name="commission" type="number" step="0.1" placeholder="Comissao %" required><input name="worked" type="number" step="0.1" placeholder="Horas trabalhadas">
       <input name="billed" type="number" step="0.1" placeholder="Horas faturadas"><button>Cadastrar</button>
     </form></article>
@@ -643,7 +644,7 @@ function usuarios(c) {
       <input name="password" type="password" placeholder="Senha" required>
       <select name="role">${ROLES.map((x) => `<option>${x}</option>`).join("")}</select>
       <button ${can("users") ? "" : "disabled"}>Criar</button>
-    </form><small id="userMsg">Perfis: Administrador, Atendente, Mecanico, Financeiro.</small></article>
+    </form><small id="userMsg">Perfis: Administrador, Escritorio, Mecanico, Financeiro.</small></article>
     <article class="card"><h3>Usuarios</h3>${table(["Nome","Usuario","Perfil"], loginUsers.map((u) => [u.name || "-", u.username, u.role]))}</article>
   </div>
   <article class="card" style="margin-top:12px;"><h3>Log de auditoria</h3>${table(["Quando","Quem","O que"], s.audit.slice(0, 60).map((x) => [d(x.when), x.who, x.action]))}</article>`;
@@ -668,7 +669,7 @@ function usuarios(c) {
       return;
     }
 
-    const role = String(v.role || "Atendente");
+    const role = String(v.role || "Escritorio");
     const name = String(v.name || username);
     logins.push({ username, password, role, name });
     saveAuthUsers(logins);
@@ -813,7 +814,7 @@ function seed() {
   const v2 = { id: uid(), plate: "XYZ9K88", model: "Sprinter", brand: "Mercedes", year: 2021, color: "Branca", km: 120000, vin: "", clientId: c2.id };
   s.vehicles.push(v1, v2);
   const e1 = { id: uid(), name: "Carlos", role: "Mecanico", commission: 8, worked: 180, billed: 156 };
-  const e2 = { id: uid(), name: "Marina", role: "Atendente", commission: 2, worked: 160, billed: 145 };
+  const e2 = { id: uid(), name: "Marina", role: "Escritorio", commission: 2, worked: 160, billed: 145 };
   s.employees.push(e1, e2);
   const sv1 = { id: uid(), name: "Troca de oleo", price: 180, hours: 1 };
   const sv2 = { id: uid(), name: "Revisao", price: 650, hours: 4 };

@@ -3,7 +3,7 @@ const AUTH_USERS_KEY = "wrmec_auth_users_v1";
 const DEFAULT_AUTH_USERS = [
   { username: "admin", password: "admin123", role: "Administrador", name: "Admin" },
   { username: "financeiro", password: "finance123", role: "Financeiro", name: "Financeiro" },
-  { username: "atendente", password: "atendente123", role: "Atendente", name: "Atendente" },
+  { username: "escritorio", password: "escritorio123", role: "Escritorio", name: "Escritorio" },
   { username: "mecanico", password: "mecanico123", role: "Mecanico", name: "Mecanico" },
 ];
 
