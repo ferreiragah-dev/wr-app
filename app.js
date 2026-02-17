@@ -115,6 +115,13 @@ function dashboard(c) {
   const fechadas = s.orders.filter((o) => o.status === "Finalizado").length;
   const tempo = avg(s.orders.filter((o) => o.closedAt).map((o) => (new Date(o.closedAt) - new Date(o.createdAt)) / 3600000));
   const critico = s.products.filter((p) => Number(p.stock || 0) <= Number(p.min || 0)).length;
+  const fluxo = {
+    orcamento: s.orders.filter((o) => o.status === "Orcamento").length,
+    aguardando: s.orders.filter((o) => o.status === "Aguardando aprovacao").length,
+    execucao: s.orders.filter((o) => o.status === "Em execucao").length,
+    finalizado: s.orders.filter((o) => o.status === "Finalizado").length,
+    cancelado: s.orders.filter((o) => o.status === "Cancelado").length,
+  };
   c.innerHTML = `
   <div class="grid">
     <article class="card"><h3>Faturamento do dia</h3><div class="kpi">${brl(faturamentoDia)}</div></article>
@@ -122,6 +129,16 @@ function dashboard(c) {
     <article class="card"><h3>Tempo medio de servico</h3><div class="kpi">${tempo.toFixed(1)}h</div></article>
     <article class="card"><h3>Estoque critico</h3><div class="kpi">${critico}</div></article>
   </div>
+  <article class="card" style="margin-top:12px;">
+    <h3>Fluxo da OS</h3>
+    <div class="timeline">
+      <span class="step-pill">Orcamento: ${fluxo.orcamento}</span>
+      <span class="step-pill">Aguardando aprovacao: ${fluxo.aguardando}</span>
+      <span class="step-pill">Em execucao: ${fluxo.execucao}</span>
+      <span class="step-pill">Finalizado: ${fluxo.finalizado}</span>
+      <span class="step-pill">Cancelado: ${fluxo.cancelado}</span>
+    </div>
+  </article>
   <div class="grid" style="margin-top:12px;">
     <article class="card"><h3>Linha: faturamento mensal</h3><canvas id="cv1" width="620" height="220"></canvas></article>
     <article class="card"><h3>Barras: servicos mais vendidos</h3><canvas id="cv2" width="620" height="220"></canvas></article>
