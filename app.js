@@ -23,7 +23,6 @@ const BASE_MENU = [
   ["os", "Ordem de Servico"],
   ["agenda", "Agenda"],
   ["crm", "CRM"],
-  ["usuarios", "Usuarios"],
   ["relatorios", "Relatorios"],
 ];
 
