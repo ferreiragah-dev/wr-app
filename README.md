@@ -23,7 +23,7 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 ## Separacao de interface
 
 - Tela padrao: foco operacional (clientes, veiculos, OS, agenda, financeiro etc).
-- Tela administrativa (`/admin`): cadastro de funcionarios, servicos e pecas/produtos.
+- Tela administrativa (`/admin`): cadastro de funcionarios, servicos, pecas/produtos e estoque.
 
 ## Persistencia
 

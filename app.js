@@ -12,7 +12,6 @@ const BASE_MENU = [
   ["dashboard", "Dashboard"],
   ["cadastro", "Cadastro Base"],
   ["os", "Ordem de Servico"],
-  ["estoque", "Estoque"],
   ["financeiro", "Financeiro"],
   ["agenda", "Agenda"],
   ["crm", "CRM"],
@@ -26,7 +25,7 @@ let tab = isAdminRoute ? "admin" : "dashboard";
 
 function getMenu() {
   if (!isAdminRoute) return BASE_MENU;
-  return [["admin", "Admin Cadastros"], ["usuarios", "Usuarios"], ["relatorios", "Relatorios"]];
+  return [["admin", "Admin Cadastros"], ["estoque", "Estoque"], ["usuarios", "Usuarios"], ["relatorios", "Relatorios"]];
 }
 
 function load() {
