@@ -354,7 +354,7 @@ function os(c) {
             </div>
             <div class="field-stack">
               <label class="field-label" for="osDelivery">Previsao de entrega</label>
-              <input id="osDelivery" name="delivery" type="datetime-local" required>
+              <input id="osDelivery" name="delivery" type="date" value="${new Date().toISOString().slice(0, 10)}" min="${new Date().toISOString().slice(0, 10)}" required>
             </div>
             <div class="field-stack">
               <label class="field-label" for="approvedToggle">Aprovacao do cliente</label>
