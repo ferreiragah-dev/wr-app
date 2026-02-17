@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WR Mecanica - Gestao de Oficina</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">WR</div>
+        <div>
+          <h1>WR Mecanica</h1>
+          <p>Gestao de Oficina</p>
+        </div>
+      </div>
+      <nav id="menu"></nav>
+      <div class="session-box">
+        <label for="currentUser">Usuario ativo</label>
+        <select id="currentUser"></select>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <h2 id="sectionTitle">Dashboard</h2>
+        <button id="seedBtn" class="secondary">Popular dados de exemplo</button>
+      </header>
+
+      <section id="alerts" class="alerts"></section>
+      <section id="sectionContent"></section>
+    </main>
+  </div>
+
+  <template id="cardTemplate">
+    <article class="card">
+      <h3></h3>
+      <div class="card-body"></div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

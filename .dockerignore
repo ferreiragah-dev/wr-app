@@ -1,0 +1,7 @@
+﻿node_modules
+.git
+.gitignore
+README.md
+.dockerignore
+*.log
+*.tmp

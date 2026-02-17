@@ -1,0 +1,274 @@
+﻿:root {
+  --bg: #0a0a0a;
+  --panel: #141414;
+  --panel-soft: #1c1c1c;
+  --yellow: #f4c300;
+  --yellow-soft: #ffe27a;
+  --text: #f8f8f8;
+  --muted: #b9b9b9;
+  --danger: #f24b4b;
+  --ok: #26c26d;
+  --info: #2f9bff;
+  --warn: #ff9300;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(244, 195, 0, 0.16) 0, rgba(244, 195, 0, 0) 40%),
+    radial-gradient(circle at 90% 90%, rgba(255, 147, 0, 0.16) 0, rgba(255, 147, 0, 0) 38%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid #2c2c2c;
+  padding: 20px;
+  background: linear-gradient(180deg, #0f0f0f 0%, #151515 100%);
+}
+
+.brand {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.brand p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #000;
+  background: linear-gradient(135deg, var(--yellow), #ffc700);
+}
+
+#menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#menu button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #303030;
+  background: #191919;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+#menu button.active,
+#menu button:hover {
+  background: #24200d;
+  border-color: #7c6512;
+}
+
+.session-box {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+
+select,
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+.session-box label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.session-box select,
+input,
+textarea,
+.form-grid select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #363636;
+  border-radius: 8px;
+  background: #101010;
+  color: var(--text);
+}
+
+.content {
+  padding: 20px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar h2 {
+  margin: 0;
+}
+
+.alerts {
+  margin: 14px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.alert {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #433;
+  background: #2a1e1e;
+}
+
+.alert.warn {
+  border-color: #674f19;
+  background: #2d240f;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid #2d2d2d;
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.card h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.kpi {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--yellow);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid #2d2d2d;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  color: var(--yellow-soft);
+}
+
+button {
+  border: 1px solid #574603;
+  background: linear-gradient(135deg, #f4c300, #f6ae00);
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: #181818;
+  color: var(--text);
+  border-color: #3a3a3a;
+}
+
+button.danger {
+  background: #3d1616;
+  color: #f5b5b5;
+  border-color: #6d2f2f;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.status-orcamento { background: var(--yellow); }
+.status-aguardando { background: var(--info); }
+.status-execucao { background: var(--warn); }
+.status-finalizado { background: var(--ok); }
+.status-cancelado { background: var(--danger); color: #fff; }
+
+.flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+canvas {
+  background: #101010;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+small {
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid #2c2c2c;
+  }
+}
