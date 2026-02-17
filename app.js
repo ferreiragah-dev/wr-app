@@ -164,29 +164,78 @@ function cadastro(c) {
 }
 
 function os(c) {
+  const counts = {
+    orc: s.orders.filter((o) => o.status === "Orcamento").length,
+    ag: s.orders.filter((o) => o.status === "Aguardando aprovacao").length,
+    ex: s.orders.filter((o) => o.status === "Em execucao").length,
+    fin: s.orders.filter((o) => o.status === "Finalizado").length,
+    can: s.orders.filter((o) => o.status === "Cancelado").length,
+  };
+
   c.innerHTML = `
-  <article class="card"><h3>Abertura OS</h3><form id="fOS" class="form-grid">
-    <input name="code" value="OS-${String(s.orders.length + 1).padStart(4, "0")}" required>
-    <select name="clientId" required>${options(s.clients, (x) => x.name)}</select>
-    <select name="vehicleId" required>${options(s.vehicles, (x) => `${x.plate} - ${x.model}`)}</select>
-    <input name="checkin" placeholder="Check-in e avarias" required>
-    <input name="labor" type="number" step="0.01" placeholder="Mao de obra" required>
-    <input name="delivery" type="datetime-local" required>
-    <label>Assinatura digital (nome)</label><input name="signature" required>
-    <label class="flex-row"><input name="approved" type="checkbox"> Aprovado pelo cliente</label>
-    <label>Servicos</label><div>${s.services.map((x) => `<label class="flex-row"><input type="checkbox" name="services" value="${x.id}"><span>${x.name} (${brl(x.price)})</span></label>`).join("") || "<small>Cadastre servicos.</small>"}</div>
-    <label>Pecas</label><div>${s.products.map((x) => `<label class="flex-row"><input type="checkbox" name="parts" value="${x.id}"><span>${x.desc}</span><input name="qty_${x.id}" type="number" min="1" placeholder="Qtd" style="max-width:80px"></label>`).join("") || "<small>Cadastre pecas.</small>"}</div>
-    <label>Fotos check-in</label><input type="file" name="before" accept="image/*" multiple>
-    <label>Fotos pos-servico</label><input type="file" name="after" accept="image/*" multiple>
-    <button>Criar OS</button>
-  </form></article>
-  <article class="card" style="margin-top:12px;"><h3>Fluxo da OS</h3>
+  <div class="section-stack">
+    <article class="card">
+      <h3>Abertura de OS</h3>
+      <div class="timeline" style="margin-bottom:10px;">
+        <span class="step-pill">Orcamento: ${counts.orc}</span>
+        <span class="step-pill">Aguardando aprovacao: ${counts.ag}</span>
+        <span class="step-pill">Em execucao: ${counts.ex}</span>
+        <span class="step-pill">Finalizado: ${counts.fin}</span>
+        <span class="step-pill">Cancelado: ${counts.can}</span>
+      </div>
+      <form id="fOS" class="section-stack">
+        <div class="subcard">
+          <h4>Dados principais</h4>
+          <div class="form-grid">
+            <input name="code" value="OS-${String(s.orders.length + 1).padStart(4, "0")}" required>
+            <select name="clientId" required>${options(s.clients, (x) => x.name)}</select>
+            <select name="vehicleId" required>${options(s.vehicles, (x) => `${x.plate} - ${x.model}`)}</select>
+            <input name="checkin" placeholder="Check-in e avarias" required>
+            <input name="labor" type="number" step="0.01" placeholder="Mao de obra" required>
+            <input name="delivery" type="datetime-local" required>
+            <input name="signature" placeholder="Assinatura digital (nome)" required>
+            <label class="flex-row"><input name="approved" type="checkbox"> Cliente aprovou o orcamento</label>
+          </div>
+        </div>
+        <div class="split-2">
+          <div class="subcard">
+            <h4>Servicos</h4>
+            <div class="check-grid">
+              ${s.services.map((x) => `<label class="flex-row"><input type="checkbox" name="services" value="${x.id}"><span>${x.name} (${brl(x.price)})</span></label>`).join("") || "<small>Cadastre servicos.</small>"}
+            </div>
+          </div>
+          <div class="subcard">
+            <h4>Pecas</h4>
+            <div class="check-grid">
+              ${s.products.map((x) => `<label class="flex-row"><input type="checkbox" name="parts" value="${x.id}"><span>${x.desc}</span><input name="qty_${x.id}" type="number" min="1" placeholder="Qtd" style="max-width:80px"></label>`).join("") || "<small>Cadastre pecas.</small>"}
+            </div>
+          </div>
+        </div>
+        <div class="split-2">
+          <div class="subcard">
+            <h4>Fotos de check-in</h4>
+            <input type="file" name="before" accept="image/*" multiple>
+          </div>
+          <div class="subcard">
+            <h4>Fotos pos-servico</h4>
+            <input type="file" name="after" accept="image/*" multiple>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button>Criar OS</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card">
+      <h3>Fluxo da OS</h3>
     ${table(["OS","Cliente","Veiculo","Status","Total","Acoes"], s.orders.map((o) => [
       o.code, byId(s.clients,o.clientId)?.name||"-", byId(s.vehicles,o.vehicleId)?.plate||"-",
       `<span class="tag ${statusTag(o.status)}">${o.status}</span>`, brl(total(o)),
-      `<button class="secondary" data-a="next" data-id="${o.id}">Avancar</button> <button class="secondary" data-a="pdf" data-id="${o.id}">PDF</button> <button class="secondary" data-a="wa" data-id="${o.id}">WhatsApp</button> <button class="danger" data-a="cancel" data-id="${o.id}" ${can("cancel") ? "" : "disabled"}>Cancelar</button>`
+      `<div class="inline-actions"><button class="secondary" data-a="next" data-id="${o.id}">Avancar</button><button class="secondary" data-a="pdf" data-id="${o.id}">PDF</button><button class="secondary" data-a="wa" data-id="${o.id}">WhatsApp</button><button class="danger" data-a="cancel" data-id="${o.id}" ${can("cancel") ? "" : "disabled"}>Cancelar</button></div>`
     ]), true)}
-  </article>`;
+    </article>
+  </div>`;
 
   document.getElementById("fOS").onsubmit = async (e) => {
     e.preventDefault();
@@ -297,16 +346,58 @@ function financeiro(c) {
 }
 
 function agenda(c) {
+  const totalAg = s.agenda.length;
+  const bloqueios = s.agenda.filter((a) => a.blocked).length;
+  const hoje = new Date().toISOString().slice(0, 10);
+  const hojeQtd = s.agenda.filter((a) => a.date === hoje).length;
+
   c.innerHTML = `
-  <div class="grid">
-    <article class="card"><h3>Agendamento</h3><form id="fAg" class="form-grid">
-      <input name="service" placeholder="Servico" required><select name="employeeId" required>${options(s.employees, (x) => x.name)}</select><input name="date" type="date" required><input name="time" type="time" required>
-      <input name="duration" type="number" step="0.5" placeholder="Duracao h" required><label class="flex-row"><input name="blocked" type="checkbox"> Bloquear horario</label><input name="delivery" type="datetime-local" placeholder="Previsao entrega"><button>Salvar</button>
-    </form></article>
-    <article class="card"><h3>Capacidade por mecanico/dia</h3><div>${capacity()}</div></article>
+  <div class="section-stack">
+    <div class="split-2">
+      <article class="card">
+        <h3>Agendamento de servicos</h3>
+        <form id="fAg" class="section-stack">
+          <div class="subcard">
+            <h4>Dados do agendamento</h4>
+            <div class="form-grid">
+              <input name="service" placeholder="Servico" required>
+              <select name="employeeId" required>${options(s.employees, (x) => x.name)}</select>
+              <input name="date" type="date" required>
+              <input name="time" type="time" required>
+              <input name="duration" type="number" step="0.5" placeholder="Duracao h" required>
+              <input name="delivery" type="datetime-local" placeholder="Previsao entrega">
+              <label class="flex-row"><input name="blocked" type="checkbox"> Bloquear horario</label>
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button>Salvar agendamento</button>
+          </div>
+        </form>
+      </article>
+      <article class="card">
+        <h3>Painel operacional</h3>
+        <div class="metric-list">
+          <div class="metric-line"><span>Agendamentos totais</span><b>${totalAg}</b></div>
+          <div class="metric-line"><span>Agendamentos hoje</span><b>${hojeQtd}</b></div>
+          <div class="metric-line"><span>Horarios bloqueados</span><b>${bloqueios}</b></div>
+        </div>
+        <div class="subcard" style="margin-top:10px;">
+          <h4>Capacidade por mecanico/dia</h4>
+          <div>${capacity()}</div>
+        </div>
+        <div class="subcard" style="margin-top:10px;">
+          <h4>Alertas de atraso</h4>
+          <div>${lateOrders()}</div>
+        </div>
+      </article>
+    </div>
+
+    <article class="card">
+      <h3>Agenda registrada</h3>
+      ${table(["Servico","Mecanico","Data","Hora","Duracao","Status","Previsao"], s.agenda.map((a) => [a.service,byId(s.employees,a.employeeId)?.name||"-",a.date,a.time,`${a.duration}h`,a.blocked?"Bloqueado":"Ativo",a.delivery||"-"]))}
+    </article>
   </div>
-  <article class="card" style="margin-top:12px;"><h3>Alertas de atraso</h3><div>${lateOrders()}</div></article>
-  <article class="card" style="margin-top:12px;"><h3>Agenda</h3>${table(["Servico","Mecanico","Data","Hora","Duracao","Status","Previsao"], s.agenda.map((a) => [a.service,byId(s.employees,a.employeeId)?.name||"-",a.date,a.time,`${a.duration}h`,a.blocked?"Bloqueado":"Ativo",a.delivery||"-"]))}</article>`;
+  `;
   on("#fAg", (v) => { s.agenda.push({ id: uid(), ...v, blocked: Boolean(v.blocked), createdAt: now() }); log(`Agenda criada: ${v.date} ${v.time}`); render(); });
 }
 function crm(c) {
