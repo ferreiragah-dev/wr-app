@@ -15,7 +15,8 @@ Aplicacao web (HTML/CSS/JS) para gestao completa de oficina, com foco na WR Meca
 - Usuario padrao: `admin`
 - Senha padrao: `admin123`
 - O login cria sessao no navegador (`localStorage`) e libera acesso as demais rotas.
-- Para trocar a foto/logo da tela de login, adicione o arquivo em `assets/wr-logo.jpg`.
+- Para trocar a foto/logo da tela de login, use o arquivo `assets/wr-logo.jpg.png`.
+- Em `Usuarios > Perfis e permissoes` agora e possivel criar `usuario` e `senha` para novo acesso.
 
 ## Modulos implementados
 

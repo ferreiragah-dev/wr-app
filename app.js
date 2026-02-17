@@ -45,6 +45,18 @@ function initAuthUsers() {
   if (!raw) localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(DEFAULT_AUTH_USERS));
 }
 
+function authUsers() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_USERS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveAuthUsers(list) {
+  localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(list));
+}
+
 function requireSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -622,15 +634,49 @@ function crm(c) {
 }
 
 function usuarios(c) {
+  const loginUsers = authUsers();
   c.innerHTML = `
   <div class="grid">
     <article class="card"><h3>Perfis e permissoes</h3><form id="fUser" class="form-grid">
-      <input name="name" placeholder="Nome" required><select name="role">${ROLES.map((x) => `<option>${x}</option>`).join("")}</select><button ${can("users") ? "" : "disabled"}>Criar</button>
-    </form><small>Perfis: Administrador, Atendente, Mecanico, Financeiro.</small></article>
-    <article class="card"><h3>Usuarios</h3>${table(["Nome","Perfil"], s.users.map((u) => [u.name, u.role]))}</article>
+      <input name="name" placeholder="Nome completo" required>
+      <input name="username" placeholder="Usuario de login" required>
+      <input name="password" type="password" placeholder="Senha" required>
+      <select name="role">${ROLES.map((x) => `<option>${x}</option>`).join("")}</select>
+      <button ${can("users") ? "" : "disabled"}>Criar</button>
+    </form><small id="userMsg">Perfis: Administrador, Atendente, Mecanico, Financeiro.</small></article>
+    <article class="card"><h3>Usuarios</h3>${table(["Nome","Usuario","Perfil"], loginUsers.map((u) => [u.name || "-", u.username, u.role]))}</article>
   </div>
   <article class="card" style="margin-top:12px;"><h3>Log de auditoria</h3>${table(["Quando","Quem","O que"], s.audit.slice(0, 60).map((x) => [d(x.when), x.who, x.action]))}</article>`;
-  on("#fUser", (v) => { if (!can("users")) return; s.users.push({ id: uid(), ...v, createdAt: now() }); log(`Usuario criado: ${v.name}`); render(); });
+
+  const userForm = document.querySelector("#fUser");
+  userForm.onsubmit = (e) => {
+    e.preventDefault();
+    if (!can("users")) return;
+    const v = val(userForm);
+    const username = String(v.username || "").trim().toLowerCase();
+    const password = String(v.password || "");
+    const msg = document.getElementById("userMsg");
+
+    if (!username || !password || password.length < 4) {
+      msg.textContent = "Defina usuario e senha (minimo 4 caracteres).";
+      return;
+    }
+
+    const logins = authUsers();
+    if (logins.some((u) => String(u.username || "").toLowerCase() === username)) {
+      msg.textContent = "Esse usuario de login ja existe.";
+      return;
+    }
+
+    const role = String(v.role || "Atendente");
+    const name = String(v.name || username);
+    logins.push({ username, password, role, name });
+    saveAuthUsers(logins);
+
+    s.users.push({ id: uid(), name, role, createdAt: now() });
+    log(`Usuario criado: ${name} (${username})`);
+    render();
+  };
 }
 
 function relatorios(c) {
