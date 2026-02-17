@@ -122,6 +122,14 @@ function dashboard(c) {
     finalizado: s.orders.filter((o) => o.status === "Finalizado").length,
     cancelado: s.orders.filter((o) => o.status === "Cancelado").length,
   };
+  const fluxoRows = s.orders.map((o) => [
+    o.code,
+    byId(s.clients, o.clientId)?.name || "-",
+    byId(s.vehicles, o.vehicleId)?.plate || "-",
+    `<span class="tag ${statusTag(o.status)}">${o.status}</span>`,
+    brl(total(o)),
+    `<div class="inline-actions"><button class="secondary" data-a="next" data-id="${o.id}">Avancar</button><button class="secondary" data-a="pdf" data-id="${o.id}">PDF</button><button class="secondary" data-a="wa" data-id="${o.id}">WhatsApp</button><button class="danger" data-a="cancel" data-id="${o.id}" ${can("cancel") ? "" : "disabled"}>Cancelar</button></div>`,
+  ]);
   c.innerHTML = `
   <div class="grid">
     <article class="card"><h3>Faturamento do dia</h3><div class="kpi">${brl(faturamentoDia)}</div></article>
@@ -139,6 +147,12 @@ function dashboard(c) {
       <span class="step-pill">Cancelado: ${fluxo.cancelado}</span>
     </div>
   </article>
+  <article class="card" style="margin-top:12px;">
+    <h3>Fluxo da OS - Detalhado</h3>
+    <div id="dashboardOsTable">
+      ${table(["OS","Cliente","Veiculo","Status","Total","Acoes"], fluxoRows, true)}
+    </div>
+  </article>
   <div class="grid" style="margin-top:12px;">
     <article class="card"><h3>Linha: faturamento mensal</h3><canvas id="cv1" width="620" height="220"></canvas></article>
     <article class="card"><h3>Barras: servicos mais vendidos</h3><canvas id="cv2" width="620" height="220"></canvas></article>
@@ -149,6 +163,15 @@ function dashboard(c) {
   drawBars("cv2");
   drawPie("cv3");
   drawHeat("cv4");
+
+  c.querySelector("#dashboardOsTable table")?.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-a]"); if (!b) return;
+    const o = byId(s.orders, b.dataset.id); if (!o) return;
+    if (b.dataset.a === "next") { nextOS(o); render(); }
+    if (b.dataset.a === "cancel" && can("cancel")) { o.status = "Cancelado"; o.updatedAt = now(); log(`OS cancelada: ${o.code}`); render(); }
+    if (b.dataset.a === "pdf") printOS(o);
+    if (b.dataset.a === "wa") wa(o);
+  });
 }
 function cadastro(c) {
   c.innerHTML = `
