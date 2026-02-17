@@ -228,16 +228,6 @@ function os(c) {
             </div>
           </div>
         </div>
-        <div class="split-2">
-          <div class="subcard">
-            <h4>Fotos de check-in</h4>
-            <input type="file" name="before" accept="image/*" multiple>
-          </div>
-          <div class="subcard">
-            <h4>Fotos pos-servico</h4>
-            <input type="file" name="after" accept="image/*" multiple>
-          </div>
-        </div>
         <div class="inline-actions">
           <button>Criar OS</button>
         </div>
@@ -299,11 +289,9 @@ function os(c) {
     const sv = Array.from(selectedServices);
     const selectedParts = Array.isArray(v.parts) ? v.parts : (v.parts ? [v.parts] : []);
     const parts = selectedParts.map((id) => ({ productId: id, qty: Number(v[`qty_${id}`] || 1) })).filter((x) => x.qty > 0);
-    const before = await files(e.target.querySelector("input[name=before]").files);
-    const after = await files(e.target.querySelector("input[name=after]").files);
     s.orders.unshift({
       id: uid(), code: v.code, clientId: v.clientId, vehicleId: v.vehicleId, checkin: v.checkin, labor: Number(v.labor || 0), delivery: v.delivery,
-      signature: v.signature, approved: Boolean(v.approved), services: sv, parts, before, after,
+      signature: v.signature, approved: Boolean(v.approved), services: sv, parts, before: [], after: [],
       status: v.approved ? "Aguardando aprovacao" : "Orcamento", createdAt: now(), updatedAt: now(), techHours: []
     });
     log(`OS criada: ${v.code}`); render();
